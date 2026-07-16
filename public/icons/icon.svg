@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- App icon: the gold/jungle table gradient + crossed swords (matches the in-app hub card) -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1" gradientTransform="rotate(10 .5 .5)">
+      <stop offset="0" stop-color="#03291F"/>
+      <stop offset=".38" stop-color="#065F46"/>
+      <stop offset=".7" stop-color="#7C4A10"/>
+      <stop offset="1" stop-color="#452A05"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="115" fill="url(#bg)"/>
+  <circle cx="430" cy="76" r="150" fill="#FBBF24" opacity=".18"/>
+  <circle cx="60" cy="470" r="120" fill="#34D399" opacity=".14"/>
+  <g transform="translate(88 88) scale(14)" fill="none" stroke="#FDE68A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/>
+    <line x1="13" x2="19" y1="19" y2="13"/>
+    <line x1="16" x2="20" y1="16" y2="20"/>
+    <line x1="19" x2="21" y1="21" y2="19"/>
+    <polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"/>
+    <line x1="5" x2="9" y1="14" y2="18"/>
+    <line x1="7" x2="4" y1="17" y2="20"/>
+    <line x1="3" x2="5" y1="19" y2="21"/>
+  </g>
+</svg>

@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------------------------
+ * Accent ramp — RGB triplets so Tailwind can apply alpha (`bg-brand/10`).
+ * Drives the brand-colored chrome (pills, buttons, the "1st" medal); the seat
+ * backgrounds are their own thing and live in src/features/games/themes.ts.
+ * ------------------------------------------------------------------------- */
+:root {
+  color-scheme: dark;
+  --ac-400: 251 113 133;
+  --ac-500: 244 63 94;
+  --ac-600: 225 29 72;
+  --ac-700: 190 18 60;
+  --ac-deep: 159 18 57;
+  --ac-hero-from: 76 29 149;
+  --ink: 15 10 25;
+  --panel: 24 16 35;
+  --elevated: 34 22 52;
+  --edge: 52 32 70;
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  @apply bg-ink text-slate-200 antialiased;
+  padding-bottom: env(safe-area-inset-bottom);
+  overscroll-behavior-y: none;
+}
+
+/* Ambient aurora — fixed accent-tinted glows behind everything, so the app
+ * has depth instead of a flat black sheet. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(42rem 30rem at 12% -6%, rgb(var(--ac-hero-from) / 0.3), transparent 65%),
+    radial-gradient(36rem 26rem at 102% 10%, rgb(var(--ac-500) / 0.09), transparent 60%),
+    radial-gradient(48rem 34rem at 55% 115%, rgb(var(--ac-deep) / 0.14), transparent 65%);
+}
+
+/* Film grain over the aurora — kills gradient banding and adds texture. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Kill the mobile tap delay and accidental double-tap zoom on controls */
+button,
+a,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+/* Tactile press feedback for anything tappable */
+.press {
+  transition:
+    transform 0.15s cubic-bezier(0.2, 1.4, 0.4, 1),
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    opacity 0.15s ease;
+}
+.press:active {
+  transform: scale(0.96);
+}
+
+/* Accessibility: honor the user's motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Same kill-switch, but driven by the in-app "Reduce motion" toggle */
+[data-motion="off"] *,
+[data-motion="off"] *::before,
+[data-motion="off"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--edge));
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--ac-700) / 0.7);
+}
+
+/* Tabular figures so score digits don't jitter as they change */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
