@@ -32,6 +32,12 @@ npm install
 npm run dev        # http://localhost:5183/riftbound/
 ```
 
+The dev server binds to loopback only. To open it on your phone, expose it deliberately — and only on a network you trust, since it has no auth:
+
+```bash
+HOST=true npm run dev
+```
+
 The app is served from the `/riftbound/` subpath, so the dev server, `vite preview` and production all share one base — set by `base` in `vite.config.ts`, which also feeds the router basename, the PWA scope and the manifest.
 
 To host it at a domain root instead, build with `BASE_PATH=/`:
@@ -87,13 +93,24 @@ Push to `main` → GitHub Actions typechecks, tests, lints, builds, and ships `d
 
 ### One-time setup
 
-1. **Repo secret** — add `VPS_SSH_PRIVATE_KEY` (Settings → Secrets and variables → Actions) with the same deploy key the other two repos use.
-2. **nginx** — paste the blocks from [`deploy/nginx-riftbound.conf`](deploy/nginx-riftbound.conf) into `/opt/khairimeske-web/nginx.conf` on the VPS, then reload:
+1. **Repo secrets** (Settings → Secrets and variables → Actions):
+   - `VPS_SSH_PRIVATE_KEY` — the same deploy key the other two repos use.
+   - `VPS_SSH_TARGET` — the SSH destination, `user@host`. It's a secret because this repo is public.
+2. **nginx** — copy [`deploy/security-headers.conf`](deploy/security-headers.conf) to `/opt/khairimeske-web/security-headers.conf`, paste the blocks from [`deploy/nginx-riftbound.conf`](deploy/nginx-riftbound.conf) into `/opt/khairimeske-web/nginx.conf`, then:
    ```bash
    docker exec khairimeske-web nginx -t && docker exec khairimeske-web nginx -s reload
    ```
+   Run `nginx -t` first — it's the gate that catches a bad paste before it takes the site down.
 
 The portfolio's own deploy extracts into the same web root without deleting, so the two apps coexist — but the nginx blocks above must survive any future rewrite of that config.
+
+### Security notes
+
+- The app makes **no network calls** and has no backend, no accounts and no cookies. All state is device-local.
+- It ships a strict **Content-Security-Policy** (see `deploy/security-headers.conf`), verified against the real bundle.
+- `add_header` in nginx does not inherit into a level that defines its own, so **every** location block includes `security-headers.conf`. Don't "tidy" those includes away — that silently strips the headers.
+- The service worker is scoped to `/riftbound/` and cannot control the rest of khairimeske.cloud.
+- Because it shares an origin with the portfolio, it also shares `localStorage`. Only game state lives there, but don't put anything sensitive in it.
 
 ## License
 
