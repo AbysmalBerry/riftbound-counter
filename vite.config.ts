@@ -49,6 +49,13 @@ export default defineConfig({
     }),
   ],
   resolve: { alias: { "@": path.resolve(__dirname, "src") } },
-  server: { port: Number(process.env.PORT) || 5183, host: true },
+  server: {
+    port: Number(process.env.PORT) || 5183,
+    // Loopback by default. The dev server has no authentication and known
+    // advisories let a visited website read its responses, so exposing it on
+    // every interface is opt-in: `HOST=true npm run dev` when you genuinely
+    // need to open the app on your phone, and only on a network you trust.
+    host: process.env.HOST === "true" ? true : "localhost",
+  },
   build: { target: "es2020", sourcemap: false },
 });
