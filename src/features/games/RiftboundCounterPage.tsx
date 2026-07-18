@@ -644,6 +644,7 @@ export default function RiftboundCounterPage() {
 
   const [toss, setToss] = useState<
     | { phase: "spin"; kind: "toss" | "flip" }
+    | { phase: "choose"; teamId: string }
     | { phase: "reveal"; kind: "toss"; teamId: string }
     | { phase: "reveal"; kind: "flip"; face: "Heads" | "Tails" }
     | null
@@ -680,9 +681,10 @@ export default function RiftboundCounterPage() {
   );
 
   /**
-   * Before anyone goes first this is the opening toss (picks a random team);
-   * afterwards it's a plain heads/tails flip for card effects. Reset clears
-   * `first`, so a fresh game gets the toss back.
+   * Before anyone goes first this is the opening toss (picks a random team,
+   * then lets that winner choose to go first or second); afterwards it's a
+   * plain heads/tails flip for card effects. Reset clears `first`, so a fresh
+   * game gets the toss back.
    */
   const doToss = () => {
     if (toss) return;
@@ -691,36 +693,58 @@ export default function RiftboundCounterPage() {
     setToss({ phase: "spin", kind });
     tossTimers.current.push(
       window.setTimeout(() => {
+        buzz([30, 60, 30]);
         if (kind === "toss") {
+          // Reveal the toss winner and hand them the choice — `first` and the
+          // clock wait until they pick (see `chooseOrder`).
           const t = teams[Math.floor(Math.random() * teams.length)];
-          setFirst(t.id);
-          setToss({ phase: "reveal", kind, teamId: t.id });
-          if (!useRiftbound.getState().running) toggleClock();
+          setToss({ phase: "choose", teamId: t.id });
         } else {
           setToss({
             phase: "reveal",
             kind,
             face: Math.random() < 0.5 ? "Heads" : "Tails",
           });
+          tossTimers.current.push(window.setTimeout(() => setToss(null), 1700));
         }
-        buzz([30, 60, 30]);
-        tossTimers.current.push(window.setTimeout(() => setToss(null), 1700));
       }, 1400),
     );
   };
 
+  /**
+   * Toss winner's call: take the first turn, or hand it off. "Second" pushes
+   * the lead to the next seat, which wraps — so a 1v1 flips cleanly to the
+   * other player. Only now do we commit `first` and start the match clock.
+   */
+  const chooseOrder = (winnerId: string, goFirst: boolean) => {
+    const wi = teams.findIndex((t) => t.id === winnerId);
+    const firstId = goFirst
+      ? winnerId
+      : teams[(wi + 1) % teams.length].id;
+    buzz(15);
+    setFirst(firstId);
+    if (!useRiftbound.getState().running) toggleClock();
+    setToss({ phase: "reveal", kind: "toss", teamId: firstId });
+    tossTimers.current.push(window.setTimeout(() => setToss(null), 1700));
+  };
+
   const tossTeam =
-    toss?.phase === "reveal" && toss.kind === "toss"
+    toss?.phase === "choose" ||
+    (toss?.phase === "reveal" && toss.kind === "toss")
       ? teams.find((t) => t.id === toss.teamId)
       : undefined;
   const revealText =
-    toss?.phase !== "reveal"
-      ? toss?.kind === "flip"
+    toss?.phase === "spin"
+      ? toss.kind === "flip"
         ? "Flipping…"
         : "Tossing…"
-      : toss.kind === "toss"
-        ? `${tossTeam?.name ?? "Player"} goes first!`
-        : `${toss.face}!`;
+      : toss?.phase === "choose"
+        ? `${tossTeam?.name ?? "Player"} won the toss!`
+        : toss?.phase === "reveal"
+          ? toss.kind === "toss"
+            ? `${tossTeam?.name ?? "Player"} goes first!`
+            : `${toss.face}!`
+          : "";
 
   const twoUp = teams.length === 2;
   const cols = 2;
@@ -868,7 +892,7 @@ export default function RiftboundCounterPage() {
               <div className="animate-coin-flip flex h-28 w-28 items-center justify-center rounded-full border-4 border-amber-200/70 bg-[radial-gradient(circle_at_35%_30%,#fde68a,#d97706_70%)] shadow-[0_0_60px_rgba(251,191,36,0.45)]">
                 <Medal className="h-12 w-12 text-amber-900" />
               </div>
-            ) : toss.kind === "toss" ? (
+            ) : toss.phase === "choose" || toss.kind === "toss" ? (
               <div
                 className={cn(
                   "animate-pop-in flex h-28 w-28 flex-col items-center justify-center rounded-full border-4 px-2 text-center",
@@ -903,6 +927,23 @@ export default function RiftboundCounterPage() {
               </div>
             )}
           </div>
+          {toss.phase === "choose" && tossTeam && (
+            <div className="flex gap-3">
+              <button
+                onClick={() => chooseOrder(tossTeam.id, true)}
+                className="press flex items-center gap-1.5 rounded-full border border-brand/40 bg-brand/15 px-6 py-3 font-display text-lg font-bold text-brand-300"
+              >
+                <Medal className="h-5 w-5" />
+                Go 1st
+              </button>
+              <button
+                onClick={() => chooseOrder(tossTeam.id, false)}
+                className="press rounded-full border border-edge bg-panel px-6 py-3 font-display text-lg font-bold text-slate-200"
+              >
+                Go 2nd
+              </button>
+            </div>
+          )}
           <p className="font-display text-2xl font-bold text-white drop-shadow-lg">
             {revealText}
           </p>

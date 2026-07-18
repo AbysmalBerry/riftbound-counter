@@ -11,8 +11,8 @@ A face-to-face score counter for the [Riftbound](https://riftbound.leagueoflegen
 - **Points, the Riftbound way** — Hold and Conquer both score +1; first to the win threshold takes the game (8 for 1v1, 11 for 2v2, settable 1–30 for custom).
 - **Modes** — 1v1, 2v2, or custom: up to 6 players as a free-for-all or in teams of 2–3, with per-seat colors.
 - **Per-seat counters** — an XP tracker and named buff cards (each with its own value), both toggleable per seat.
-- **Match clock** — starts automatically on the opening toss; pause/resume from the control bar.
-- **Toss & flip** — the first tap picks who goes first; afterwards the same button is a plain heads/tails flip for card effects.
+- **Match clock** — starts automatically once the opening toss is settled; pause/resume from the control bar.
+- **Toss & flip** — the first tap picks a random toss winner, who then chooses to go 1st or 2nd; afterwards the same button is a plain heads/tails flip for card effects.
 - **Match history** — every reset logs the game locally (last 30).
 - **Screen wake lock** — the table won't dim mid-game.
 
