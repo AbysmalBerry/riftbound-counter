@@ -7,6 +7,7 @@ import { useApplyPreferences } from "@/hooks/useApplyPreferences";
 const GamesPage = lazy(() => import("@/features/games/GamesPage"));
 const RiftboundSetupPage = lazy(() => import("@/features/games/RiftboundSetupPage"));
 const RiftboundCounterPage = lazy(() => import("@/features/games/RiftboundCounterPage"));
+const QuizPage = lazy(() => import("@/features/quiz/QuizPage"));
 
 const Loading = () => (
   <div className="flex h-40 items-center justify-center">
@@ -25,6 +26,7 @@ export default function App() {
       <Route element={<AppShell />}>
         <Route index element={page(<GamesPage />)} />
         <Route path="/setup" element={page(<RiftboundSetupPage />)} />
+        <Route path="/quiz" element={page(<QuizPage />)} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
       {/* Full-screen table tool — outside the shell so the whole viewport is the counter */}

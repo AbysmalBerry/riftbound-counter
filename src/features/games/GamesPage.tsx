@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
+  BrainCircuit,
   ChevronRight,
   History,
   Swords,
@@ -137,6 +138,31 @@ function GamesTab() {
             <Timer className="h-3.5 w-3.5" />
             Face-to-face layout — hand the phone to the table, not to each
             player.
+          </div>
+        </div>
+      </Link>
+
+      <Link to="/quiz" onClick={() => buzz(10)} className="press block">
+        <div className="relative overflow-hidden rounded-2xl border border-edge/80 p-5 shadow-card">
+          <div className="absolute inset-0 bg-[linear-gradient(120deg,#2e1065_0%,#6d28d9_42%,#1e3a8a_74%,#0b1f4a_100%)]" />
+          <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-violet-400/20 blur-3xl" />
+          <div className="absolute -bottom-10 -left-6 h-36 w-36 rounded-full bg-sky-400/20 blur-3xl" />
+          <div className="relative flex items-center gap-4">
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-black/35 shadow-lg backdrop-blur-sm">
+              <BrainCircuit className="h-7 w-7 text-violet-200" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-display text-xl font-bold text-white">Card Quiz</span>
+              <span className="mt-0.5 block text-sm text-white/70">
+                Flashcard trainer — guess the card name or its effect from the art,
+                with filters by domain, might and more.
+              </span>
+            </span>
+            <ChevronRight className="h-5 w-5 shrink-0 text-white/70" />
+          </div>
+          <div className="relative mt-4 flex items-center gap-2 text-xs font-medium text-white/60">
+            <BrainCircuit className="h-3.5 w-3.5" />
+            Learn the set — 1,180 cards, endless multiple-choice rounds.
           </div>
         </div>
       </Link>
