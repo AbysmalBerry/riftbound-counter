@@ -6,6 +6,7 @@ import { buzz } from "@/lib/haptics";
 const TITLES: Record<string, string> = {
   "/": "Riftbound Counter",
   "/setup": "Match setup",
+  "/quiz": "Card quiz",
 };
 
 /**

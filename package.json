@@ -12,6 +12,7 @@
     "lint": "eslint . --ext ts,tsx",
     "test": "vitest run",
     "icons": "node scripts/generate-icons.mjs",
+    "cards": "node scripts/fetch-cards.mjs",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\""
   },
   "dependencies": {
