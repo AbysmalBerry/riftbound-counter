@@ -1,5 +1,5 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { ChevronLeft, Swords } from "lucide-react";
+import { ChevronLeft, Settings, Swords } from "lucide-react";
 import { buzz } from "@/lib/haptics";
 
 /** Route → header title. The play table renders outside this shell. */
@@ -7,6 +7,7 @@ const TITLES: Record<string, string> = {
   "/": "Riftbound Counter",
   "/setup": "Match setup",
   "/quiz": "Card quiz",
+  "/settings": "Settings",
 };
 
 /**
@@ -17,6 +18,7 @@ export function AppShell() {
   const location = useLocation();
   const navigate = useNavigate();
   const atRoot = location.pathname === "/";
+  const atSettings = location.pathname === "/settings";
   const title = TITLES[location.pathname] ?? "Riftbound Counter";
 
   return (
@@ -40,10 +42,22 @@ export function AppShell() {
         )}
         <h1
           key={location.pathname}
-          className="animate-page-in font-display text-lg font-bold tracking-tight"
+          className="animate-page-in flex-1 font-display text-lg font-bold tracking-tight"
         >
           {title}
         </h1>
+        {!atSettings && (
+          <button
+            onClick={() => {
+              buzz(8);
+              navigate("/settings");
+            }}
+            aria-label="Settings"
+            className="press flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-edge bg-panel text-slate-200"
+          >
+            <Settings className="h-5 w-5" />
+          </button>
+        )}
       </header>
 
       {/* Keyed on the route so each page slides in fresh */}
