@@ -56,6 +56,18 @@ export default defineConfig({
     // every interface is opt-in: `HOST=true npm run dev` when you genuinely
     // need to open the app on your phone, and only on a network you trust.
     host: process.env.HOST === "true" ? true : "localhost",
+    // Same-origin proxy to the official card gallery for the in-app "Update
+    // cards" action — their endpoint sends no CORS header, so the browser
+    // can't fetch it directly. nginx mirrors this block in prod (see
+    // deploy/nginx-riftbound.conf).
+    proxy: {
+      [`${base}gallery`]: {
+        target: "https://playriftbound.com",
+        changeOrigin: true,
+        followRedirects: true,
+        rewrite: (p) => p.replace(`${base}gallery`, ""),
+      },
+    },
   },
   build: { target: "es2020", sourcemap: false },
 });
