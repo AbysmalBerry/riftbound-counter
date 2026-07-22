@@ -1,5 +1,5 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { ChevronLeft, Swords } from "lucide-react";
+import { ChevronLeft, Settings, Swords } from "lucide-react";
 import { buzz } from "@/lib/haptics";
 
 /** Route → header title. The play table renders outside this shell. */
@@ -7,6 +7,7 @@ const TITLES: Record<string, string> = {
   "/": "Riftbound Counter",
   "/setup": "Match setup",
   "/quiz": "Card quiz",
+  "/settings": "Settings",
 };
 
 /**
@@ -44,6 +45,20 @@ export function AppShell() {
         >
           {title}
         </h1>
+
+        {/* Settings entry — hidden on the settings page itself. */}
+        {location.pathname !== "/settings" && (
+          <button
+            onClick={() => {
+              buzz(8);
+              navigate("/settings");
+            }}
+            aria-label="Settings"
+            className="press ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-edge bg-panel text-slate-300"
+          >
+            <Settings className="h-5 w-5" />
+          </button>
+        )}
       </header>
 
       {/* Keyed on the route so each page slides in fresh */}

@@ -3,11 +3,9 @@ import type { Card, CardSnapshot, Filters } from "./types";
 
 const data = snapshot as CardSnapshot;
 
-/** Every card in the bundled set. */
-export const CARDS: Card[] = data.cards;
-
-/** When the snapshot was captured — surfaced in the setup footer. */
-export const SNAPSHOT = { fetchedAt: data.fetchedAt, count: data.count };
+/** The card set shipped in the bundle — seed + offline fallback. */
+export const BUNDLED_CARDS: Card[] = data.cards;
+export const BUNDLED_SNAPSHOT = { fetchedAt: data.fetchedAt, count: data.count };
 
 /** Domain → brand color, mirroring Riot's rune palette. */
 export const DOMAIN_COLORS: Record<string, string> = {
@@ -20,29 +18,41 @@ export const DOMAIN_COLORS: Record<string, string> = {
   Colorless: "#94a3b8",
 };
 
-/** Distinct, display-ordered option lists for the filter UI. */
-function distinct(pick: (c: Card) => (string | number)[]): (string | number)[] {
-  const seen = new Set<string | number>();
-  for (const c of CARDS) for (const v of pick(c)) if (v != null) seen.add(v);
-  return [...seen];
-}
-
 const TYPE_ORDER = ["Unit", "Spell", "Gear", "Legend", "Battlefield", "Rune"];
 const RARITY_ORDER = ["Common", "Uncommon", "Rare", "Epic", "Showcase"];
 
-export const FILTER_OPTIONS = {
-  types: (distinct((c) => c.type) as string[]).sort(
-    (a, b) => TYPE_ORDER.indexOf(a) - TYPE_ORDER.indexOf(b),
-  ),
-  domains: (distinct((c) => c.domains) as string[]).sort(
-    (a, b) => Object.keys(DOMAIN_COLORS).indexOf(a) - Object.keys(DOMAIN_COLORS).indexOf(b),
-  ),
-  sets: distinct((c) => (c.set ? [c.set] : [])) as string[],
-  rarities: (distinct((c) => (c.rarity ? [c.rarity] : [])) as string[]).sort(
-    (a, b) => RARITY_ORDER.indexOf(a) - RARITY_ORDER.indexOf(b),
-  ),
-  might: (distinct((c) => (c.might != null ? [c.might] : [])) as number[]).sort((a, b) => a - b),
-};
+export interface FilterOptions {
+  types: string[];
+  domains: string[];
+  sets: string[];
+  rarities: string[];
+  might: number[];
+}
+
+/** Distinct, display-ordered option lists derived from a given card set. */
+export function filterOptions(cards: Card[]): FilterOptions {
+  const types = new Set<string>();
+  const domains = new Set<string>();
+  const sets = new Set<string>();
+  const rarities = new Set<string>();
+  const might = new Set<number>();
+  for (const c of cards) {
+    c.type.forEach((t) => types.add(t));
+    c.domains.forEach((d) => domains.add(d));
+    if (c.set) sets.add(c.set);
+    if (c.rarity) rarities.add(c.rarity);
+    if (c.might != null) might.add(c.might);
+  }
+  return {
+    types: [...types].sort((a, b) => TYPE_ORDER.indexOf(a) - TYPE_ORDER.indexOf(b)),
+    domains: [...domains].sort(
+      (a, b) => Object.keys(DOMAIN_COLORS).indexOf(a) - Object.keys(DOMAIN_COLORS).indexOf(b),
+    ),
+    sets: [...sets],
+    rarities: [...rarities].sort((a, b) => RARITY_ORDER.indexOf(a) - RARITY_ORDER.indexOf(b)),
+    might: [...might].sort((a, b) => a - b),
+  };
+}
 
 export const EMPTY_FILTERS: Filters = {
   types: [],
@@ -63,6 +73,6 @@ export function matches(card: Card, f: Filters): boolean {
 }
 
 /** Cards eligible for a given mode + filter set. "effect" needs ability text. */
-export function eligible(mode: "name" | "effect", f: Filters): Card[] {
-  return CARDS.filter((c) => matches(c, f) && (mode === "name" || c.text.trim().length > 0));
+export function eligible(cards: Card[], mode: "name" | "effect", f: Filters): Card[] {
+  return cards.filter((c) => matches(c, f) && (mode === "name" || c.text.trim().length > 0));
 }

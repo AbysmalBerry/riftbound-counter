@@ -13,9 +13,10 @@ import { Button } from "@/components/ui/button";
 import { buzz } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
 import { Ability } from "./Ability";
-import { DOMAIN_COLORS, FILTER_OPTIONS, SNAPSHOT, eligible } from "./data";
+import { DOMAIN_COLORS, eligible, filterOptions } from "./data";
 import { mulberry32, nextQuestion } from "./quiz";
 import { useQuiz } from "./useQuiz";
+import { useCards, useHydrateCards } from "./useCards";
 import type { Card as CardT, Filters, Question, QuizMode } from "./types";
 
 /** Sanity CDN resize — request a display-sized image, not the full 744px art. */
@@ -275,7 +276,10 @@ function QuizSetup({ onStart }: { onStart: () => void }) {
   const clearFilters = useQuiz((s) => s.clearFilters);
   const { answered, correct, bestStreak, resetStats } = useQuiz();
 
-  const count = useMemo(() => eligible(mode, filters).length, [mode, filters]);
+  const cards = useCards((s) => s.cards);
+  const fetchedAt = useCards((s) => s.fetchedAt);
+  const options = useMemo(() => filterOptions(cards), [cards]);
+  const count = useMemo(() => eligible(cards, mode, filters).length, [cards, mode, filters]);
   const anyFilter = Object.values(filters).some((a) => a.length > 0);
   const accuracy = answered > 0 ? Math.round((correct / answered) * 100) : 0;
 
@@ -335,11 +339,11 @@ function QuizSetup({ onStart }: { onStart: () => void }) {
             </button>
           )}
         </div>
-        <FilterGroup facet="types" label="Type" options={FILTER_OPTIONS.types} />
+        <FilterGroup facet="types" label="Type" options={options.types} />
         <FilterGroup
           facet="domains"
           label="Domain"
-          options={FILTER_OPTIONS.domains}
+          options={options.domains}
           render={(d) => (
             <>
               <span
@@ -353,11 +357,11 @@ function QuizSetup({ onStart }: { onStart: () => void }) {
         <FilterGroup
           facet="might"
           label="Might"
-          options={FILTER_OPTIONS.might}
+          options={options.might}
           render={(m) => <>⚔ {m}</>}
         />
-        <FilterGroup facet="sets" label="Set" options={FILTER_OPTIONS.sets} />
-        <FilterGroup facet="rarities" label="Rarity" options={FILTER_OPTIONS.rarities} />
+        <FilterGroup facet="sets" label="Set" options={options.sets} />
+        <FilterGroup facet="rarities" label="Rarity" options={options.rarities} />
       </Card>
 
       <Button onClick={onStart} disabled={count < 2} className="w-full">
@@ -396,7 +400,7 @@ function QuizSetup({ onStart }: { onStart: () => void }) {
       </Card>
 
       <p className="px-1 text-center text-xs text-slate-500">
-        {SNAPSHOT.count} cards · snapshot {new Date(SNAPSHOT.fetchedAt).toLocaleDateString()}
+        {cards.length} cards · updated {new Date(fetchedAt).toLocaleDateString()}
       </p>
     </div>
   );
@@ -406,10 +410,12 @@ function QuizSetup({ onStart }: { onStart: () => void }) {
 
 /** Flashcard quiz — set filters + mode, then run an endless MCQ session. */
 export default function QuizPage() {
+  useHydrateCards();
   const [playing, setPlaying] = useState(false);
   const mode = useQuiz((s) => s.mode);
   const filters = useQuiz((s) => s.filters);
-  const pool = useMemo(() => eligible(mode, filters), [mode, filters]);
+  const cards = useCards((s) => s.cards);
+  const pool = useMemo(() => eligible(cards, mode, filters), [cards, mode, filters]);
 
   return playing ? (
     <QuizPlay mode={mode} pool={pool} onExit={() => setPlaying(false)} />

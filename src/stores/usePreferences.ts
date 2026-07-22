@@ -1,16 +1,18 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { DEFAULT_ACCENT } from "@/theme/accents";
 
 /**
- * Device-local app preferences (`rb.prefs`). The counter lives on a phone in
- * the middle of a table, so both of these are about physical comfort rather
- * than looks: vibration on every tap, and the animation kill-switch.
+ * Device-local app preferences (`rb.prefs`): vibration on every tap, the
+ * animation kill-switch, and the chosen accent theme.
  */
 interface PreferencesState {
   haptics: boolean;
   setHaptics: (on: boolean) => void;
   reduceMotion: boolean;
   setReduceMotion: (on: boolean) => void;
+  accent: string;
+  setAccent: (id: string) => void;
 }
 
 export const usePreferences = create<PreferencesState>()(
@@ -20,6 +22,8 @@ export const usePreferences = create<PreferencesState>()(
       setHaptics: (haptics) => set({ haptics }),
       reduceMotion: false,
       setReduceMotion: (reduceMotion) => set({ reduceMotion }),
+      accent: DEFAULT_ACCENT,
+      setAccent: (accent) => set({ accent }),
     }),
     { name: "rb.prefs" },
   ),
